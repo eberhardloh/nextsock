@@ -28,6 +28,12 @@ const Home = () => {
         setPayload(cargo);
     });
 
+    useSocket('role-type-two', cargo => {
+        console.log('on(role-type-two)\n%s', JSON.stringify(cargo, null, 2));
+
+        setPayload(cargo);
+    });
+
     useEffect(() => {
         if(payload.user) {
             setUser(payload.user);

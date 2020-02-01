@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "sv": "./node_modules/.bin/supervisor -k -n error -w server.js,lib/db.js -- server.js",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "sv": "./node_modules/.bin/supervisor -k -n error -w server.js,lib/db.js -- server.js"
   },
   "dependencies": {
     "dotenv": "^8.2.0",

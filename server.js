@@ -38,10 +38,21 @@ nextApp.prepare().then(() => {
 
 // based on socket.id, just containing user.id and minor informations
 const connections = {};
+
 // container for the connected individuals ("user.id": {...})
-const connected = {};
+const individuals = {};
 
 let totalConnections = 0;
+
+let monitorId = '';
+
+const monitor = (obj) => {
+    console.log('MONITOR > %s', JSON.stringify(obj, null, 0));
+    if(monitorId) {
+        io.to(monitorId).emit('monitor', obj);
+    }
+}
+
 
 // socket.io server
 io.on('connection', async (socket) => {
@@ -63,16 +74,30 @@ io.on('connection', async (socket) => {
 //        console.log('HMR connect: %s', socket.id);
     }
 
+    let user = connections[socket.id].who ? individuals[connections[socket.id].who] : { id: 0 }
 
     // Handshake with User-Identifikation
     socket.on('hello', async (payload) => {
         console.log('HELLO\n%s', JSON.stringify(payload, null, 2));
 
         if(payload.who) {
-            let user = await db.getUser(payload.who);
-            if(user && user.role) {
-                socket.emit(user.role, { user: user });
+            if(payload.who == 'monitor') {
+                monitorId = socket.id;
+                monitor({ monitor: monitorId });
+            } else {
+                let user = await db.getUser(payload.who);
+                if(user && user.role) {
+                    connections[socket.id].who = user.uid;
+                    connections[socket.id].what = user.role;
+
+                    individuals[user.id] = user;
+                    individuals[user.id].socket_id = socket.id;
+
+                    socket.emit(user.role, { user: user });
+
+                }
             }
+            monitor({ individuals: individuals });
         } else {
             console.log('invalid user');
         }
@@ -108,7 +133,13 @@ io.on('connection', async (socket) => {
 
             // ...
 
+            if(socket.id == monitorId) {
+                monitorId = '';
+            }
+
             delete connections[socket.id];
+
+            // indiviuals[...] is kept due to reconnect!
 
             // console.log('DISCONNECT: %s', socket.id);
 
