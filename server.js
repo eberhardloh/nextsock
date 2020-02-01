@@ -44,12 +44,15 @@ const individuals = {};
 
 let totalConnections = 0;
 
-let monitorId = '';
 
-const monitor = (obj) => {
-    console.log('MONITOR > %s', JSON.stringify(obj, null, 0));
+// MONITOR
+let monitorId = '';
+const monitor = (obj, log = '', indent = 0) => {
     if(monitorId) {
         io.to(monitorId).emit('monitor', obj);
+    }
+    if(log) {
+        console.log('MONITOR ' + log + '\n%s', JSON.stringify(obj, null, indent));
     }
 }
 
@@ -76,26 +79,29 @@ io.on('connection', async (socket) => {
 
     let user = connections[socket.id].who ? individuals[connections[socket.id].who] : { id: 0 }
 
+    // Handshake specials
+    socket.on('monitor', (payload) => {
+        monitorId = socket.id;
+        connections[socket.id].what = 'monitor';
+        monitor({ connections: connections });
+    });
+
     // Handshake with User-Identifikation
     socket.on('hello', async (payload) => {
         console.log('HELLO\n%s', JSON.stringify(payload, null, 2));
 
         if(payload.who) {
-            if(payload.who == 'monitor') {
-                monitorId = socket.id;
-                monitor({ monitor: monitorId });
-            } else {
-                let user = await db.getUser(payload.who);
-                if(user && user.role) {
-                    connections[socket.id].who = user.uid;
-                    connections[socket.id].what = user.role;
+            let user = await db.getUser(payload.who);
+            if(user && user.role) {
+                connections[socket.id].who = user.id;
+                connections[socket.id].what = user.role;
+                monitor({ connections: connections }, 'user');
 
-                    individuals[user.id] = user;
-                    individuals[user.id].socket_id = socket.id;
+                individuals[user.id] = user;
+                individuals[user.id].socket_id = socket.id;
 
-                    socket.emit(user.role, { user: user });
+                socket.emit(user.role, { user: user });
 
-                }
             }
             monitor({ individuals: individuals });
         } else {
@@ -138,6 +144,7 @@ io.on('connection', async (socket) => {
             }
 
             delete connections[socket.id];
+            monitor({ connections: connections });
 
             // indiviuals[...] is kept due to reconnect!
 

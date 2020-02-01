@@ -6,13 +6,15 @@ import { getParams } from '../lib/tools';
 import Head from 'next/head';
 
 const Monitor = () => {
+    const [update,  setUpdate]  = useState(0);
     const [payload, setPayload] = useState({});
     const [data,    setData]    = useState({});
+    const [rpl,     setRpl]     = useState('');
 
     const socket = useSocket();
 
     useSocket('hello', cargo => {
-        socket.emit('hello', { who: 'monitor' });
+        socket.emit('monitor', 1);
     });
 
     useSocket('monitor', cargo => {
@@ -21,7 +23,10 @@ const Monitor = () => {
     });
 
     useEffect(() => {
-        Object.keys(payload).map((item, index) => { setData({ ...data, [item]: payload[item] }) });
+        // Object.keys(payload).map((item, index) => { console.log(item); setData({ ...data, [item]: payload[item] }) });
+        setUpdate(update + 1);
+        setData({ ...data, ...payload });
+        setRpl('"(' + Object.keys(payload).join('|') + ')"');
     }, [payload]);
 
     return (
@@ -30,9 +35,8 @@ const Monitor = () => {
               <title>Server variables monitor</title>
               <link rel="icon" href="/favicon.ico" />
             </Head>
-            <pre>{JSON.stringify(data, null, 2)}</pre>
-            <p>Last payload</p>
-            <pre>{JSON.stringify(payload, null, 2)}</pre>
+            <p>Update {update}: {Object.keys(payload).join(', ')}</p>
+            <pre dangerouslySetInnerHTML={{ __html: JSON.stringify(data, null, 2).replace(new RegExp(rpl, 'g'), '"<span style="background-color: #FF9; border: 1px navy dashed">$1</span>"') }} />
             <style jsx>{`
                 pre { color: navy; font-family: 'Courier New'; font-size: 12px; }
             `}</style>
