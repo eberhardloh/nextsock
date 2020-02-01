@@ -1,11 +1,13 @@
 # nextsock
 
-A skeleton app based on a tri-front audience / speaker / board system.
+A skeleton app derived from a tri-frontend audience / speaker / board system.
 
 That's the solution of the mystery, how to deal with socket and state.
-Several hours and lots of experiments to find out.
+Several hours and lots of experiments to find out (started as newbie).
 
-yarn recommended.
+Keywords: next.js, socket.io, mysql
+
+**yarn** recommended.
 
 ## setup
 
@@ -31,7 +33,7 @@ DBDATABASE="nextsock"
 
 ### useState
 
-use as many stateful variables you app needs...
+use as many stateful variables your app needs...
 
 ```js
 const [payload, setPayload] = useState({});
