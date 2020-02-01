@@ -1,0 +1,23 @@
+{
+  "name": "nextsock",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "sv": "./node_modules/.bin/supervisor -k -n error -w server.js,lib/db.js -- server.js",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "next": "9.2.1",
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
+    "serverless-mysql": "^1.5.3",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0",
+    "sql-template-strings": "^2.2.2",
+    "supervisor": "^0.12.0"
+  }
+}
